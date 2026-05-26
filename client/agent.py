@@ -41,10 +41,11 @@ async def get_policy_input_schema():
     return PolicyInputSchema.model_json_schema()
 
 async def main(query: str):
+    MCP_SERVER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../server.py")
     # Use stdio_client for MCP connection
     server_params = StdioServerParameters(
         command="python",
-        args=["../server.py"],
+        args=[MCP_SERVER_PATH],
         env=None,
     )
     async with stdio_client(server_params) as (read, write):
