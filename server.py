@@ -12,13 +12,14 @@ mcp = fastmcp.FastMCP(
     - call `test_rego` to test the generated OPA V1 policy using OPA CLI, you can call it multiple times with different mock_input to test various scenarios, and use the `retry_count` to keep track of how many times the test has been retried for debugging purposes. If the test fails, analyze the error message and adjust the policy accordingly, then retry the test until it passes.
     - call `harness_skill` to save the final version of the generated policy in markdown format, which includes the policy code and explanations of the rules and logic used in the policy. This will serve as documentation for the generated policy and can be used for future reference or sharing with others."""
 )
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 @mcp.tool
 async def get_skill_context():
     """
     - Use this skill content to write good policy.
     """
-    async with aiofile.AIOFile("policy_skill.md", "r") as f:
+    async with aiofile.AIOFile(os.path.join(BASE_DIR, "policy_skill.md"), "r") as f:
         return await f.read()
 @mcp.tool
 async def verify_input_schema(input_schema:dict):
@@ -50,8 +51,9 @@ async def test_rego(policy:str, package_name:str,mock_input:list[dict],test_valu
             await f.write(json.dumps(item))
         try:
             print(f"Testing policy with input case {i} for value {test_value}: Retry_count: {retry_count}")
+            OPA_CLI_PATH = os.path.join(BASE_DIR, "opa")  # Adjust this path if OPA CLI is located elsewhere
             result = subprocess.run(
-                ["./opa", "eval", "-i", input_file, "-d", file_name, test_value],
+                [OPA_CLI_PATH, "eval", "-i", input_file, "-d", file_name, test_value],
                 capture_output=True,
                 text=True,
                 check=True,
@@ -72,8 +74,8 @@ async def harness_skill(current_skill:str, updated_skill:str):
     - only run this if `test_rego` tool returns successful tests after multiple retries and debugging.if succeeded in one try, no need to harness, if failed and error out, No point on harnessing, as it still doesn't know what solves the problem.
     - get current skill calling `get_skill_context`, and update it
     """
-    
-    async with aiofile.AIOFile("policy_skill.md", "w") as f:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    async with aiofile.AIOFile(os.path.join(BASE_DIR, "policy_skill.md"), "w") as f:
         await f.write(updated_skill)
 
 if __name__ == "__main__":
