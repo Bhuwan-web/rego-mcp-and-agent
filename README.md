@@ -111,3 +111,61 @@ This schema is used for all policy generation and testing. The agent will not pr
 ## License
 
 MIT License. See LICENSE file.
+
+---
+
+## Using rego-mcp Docker Image in VS Code, Codex, and ClaudeCode
+
+
+You can use the prebuilt Docker image for rego-mcp: `bhuwanpanta/rego-mcp:latest`.
+
+**Note:** rego-mcp runs in stdio mode (not HTTP). It should be configured as an MCP that communicates over standard input/output, not via a network port.
+
+### VS Code MCP Integration (mcp.json)
+
+
+Add the following entry to your `mcp.json` to enable rego-mcp (using the recommended servers format):
+
+```json
+{
+   "servers": {
+      "rego-mcp": {
+         "command": "docker",
+         "args": [
+            "run",
+            "-i",
+            "--rm",
+            "bhuwanpanta/rego-mcp:latest"
+         ]
+      }
+   }
+}
+```
+
+### Run rego-mcp Manually with Docker
+
+To run rego-mcp locally for testing or development (in stdio mode), use:
+
+```bash
+docker run -i --rm bhuwanpanta/rego-mcp:latest
+```
+
+This will start the MCP server in stdio mode and automatically clean up the container after it exits. You can connect to it using tools that support stdio MCPs.
+
+### Enable rego-mcp in Codex
+
+To enable rego-mcp in Codex, run:
+
+```bash
+codex mcp add rego-mcp -- docker run -i --rm bhuwanpanta/rego-mcp:latest
+```
+
+### Enable rego-mcp in ClaudeCode
+
+To enable rego-mcp in ClaudeCode, run:
+
+```bash
+claudecode mcp add rego-mcp -- docker run -i --rm bhuwanpanta/rego-mcp:latest
+```
+
+This will make rego-mcp available as an MCP backend for policy generation and validation in your preferred environment.
